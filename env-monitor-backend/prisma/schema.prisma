@@ -3,25 +3,40 @@ generator client {
 }
 
 datasource db {
-  provider = "sqlite"
+  provider = "postgresql"   
   url      = env("DATABASE_URL")
 }
 
 model User {
-  id        Int      @id @default(autoincrement())
-  username  String   @unique
+  id        Int        @id @default(autoincrement())
+  username  String     @unique
   password  String
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
   readings  Reading[]
+  devices   Device[]
+}
+
+model Device {
+  id        Int        @id @default(autoincrement())
+  userId    Int
+  name      String
+  deviceId  String     @unique // ESP32 ID
+  createdAt DateTime   @default(now())
+  readings  Reading[]
+
+  user      User       @relation(fields: [userId], references: [id])
 }
 
 model Reading {
   id          Int      @id @default(autoincrement())
-  userId      Int
-  temperature Float
-  humidity    Float
+  deviceId    Int
+  temperature Float?
+  humidity    Float?
+  gas         Float?
+  pressure    Float?
+  pm25        Float?
   createdAt   DateTime @default(now())
 
-  user        User     @relation(fields: [userId], references: [id])
+  device      Device   @relation(fields: [deviceId], references: [id])
 }
